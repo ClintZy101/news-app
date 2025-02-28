@@ -9,6 +9,9 @@ import SignOut from "./components/auth/SignOut";
 import Register from "./components/auth/Register";
 import axiosInstance from "./utils/axiosInstance"; // Ensure axiosInstance is imported
 import useUserStore from "./store/userStore";
+import AdminPanel from './pages/AdminPanel';
+import CreateArticle from './pages/CreateArticle';
+import EditArticle from './pages/EditArticle';
 
 function AppContent() {
   const [tags, setTags] = React.useState([]);
@@ -41,6 +44,9 @@ function AppContent() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signout" element={<SignOut />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/admin-panel" element={<AdminPanel />} />
+        <Route path="/create-article" element={<CreateArticle />} />
+        <Route path="/edit-article/:id" element={<EditArticle />} />
       </Routes>
     </div>
   );

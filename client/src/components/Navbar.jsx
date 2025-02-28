@@ -66,7 +66,10 @@ const Navbar = ({ tags }) => {
             )}
           </div>
           {user.role === 'admin' && (
-            <Link to="/create-news" className="text-white bg-gray-700 hover:bg-gray-900 text-white px-4 py-2 rounded cursor-pointern transition-all duration-300">Create News</Link>
+            <>
+              <Link to="/create-news" className="text-white bg-gray-700 hover:bg-gray-900 text-white px-4 py-2 rounded cursor-pointer transition-all duration-300">Create News</Link>
+              <Link to="/admin-panel" className="text-white bg-gray-700 hover:bg-gray-900 text-white px-4 py-2 rounded cursor-pointer transition-all duration-300">Admin Panel</Link>
+            </>
           )}
           {email ? (
             <>

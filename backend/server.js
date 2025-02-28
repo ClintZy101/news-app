@@ -110,6 +110,31 @@ app.post("/api/news", authMiddleware("admin"), async (req, res) => {
   res.json(newNews);
 });
 
+// Edit News (only admin)
+app.put('/api/news/:id', authMiddleware('admin'), async (req, res) => {
+  try {
+    const { title, text, images, tags } = req.body;
+    const updatedNews = await News.findByIdAndUpdate(
+      req.params.id,
+      { title, text, images, tags },
+      { new: true }
+    );
+    if (!updatedNews) return res.status(404).json({ message: 'News not found' });
+    io.emit('newsUpdated', updatedNews); // Emit event to all connected clients
+    res.json(updatedNews);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update news' });
+  }
+});
+
+// Delete News with Confirmation (only admin)
+app.delete("/api/news/:id", authMiddleware("admin"), async (req, res) => {
+  const news = await News.findByIdAndDelete(req.params.id);
+  if (!news) return res.status(404).json({ message: "News not found" });
+  res.json({ message: "News deleted successfully" });
+});
+
+
 // Get News (Infinite Scroll)
 app.get("/api/news", async (req, res) => {
   try {
@@ -154,7 +179,7 @@ app.get("/api/news/tags/:tag", async (req, res) => {
 });
 
 // Get News by ID
-app.get("/news/:id", async (req, res) => {
+app.get("/api/news/:id", async (req, res) => {
   const news = await News.findById(req.params.id);
   if (!news) return res.status(404).json({ message: "News not found" });
   news.views += 1;
@@ -181,11 +206,23 @@ app.post("/news/:id/dislike", async (req, res) => {
   res.json({ dislikes: news.dislikes });
 });
 
-// Delete News with Confirmation (only admin)
-app.delete("/news/:id", authMiddleware("admin"), async (req, res) => {
-  const news = await News.findByIdAndDelete(req.params.id);
-  if (!news) return res.status(404).json({ message: "News not found" });
-  res.json({ message: "News deleted successfully" });
+
+// Get all news for admin panel with pagination
+app.get('/api/admin/news', authMiddleware('admin'), async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const totalArticles = await News.countDocuments();
+    const totalPages = Math.ceil(totalArticles / limit);
+    const articles = await News.find()
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.json({ articles, totalPages });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch news' });
+  }
 });
 
 // WebSocket setup
