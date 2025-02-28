@@ -8,10 +8,12 @@ import SignIn from "./components/auth/SignIn";
 import SignOut from "./components/auth/SignOut";
 import Register from "./components/auth/Register";
 import axiosInstance from "./utils/axiosInstance"; // Ensure axiosInstance is imported
+import useUserStore from "./store/userStore";
 
 function AppContent() {
   const [tags, setTags] = React.useState([]);
   const location = useLocation();
+  const user = useUserStore((state) => state.user);
 
   React.useEffect(() => {
     const fetchTags = async () => {
@@ -25,6 +27,7 @@ function AppContent() {
 
     fetchTags();
   }, []);
+  console.log(user.role);
 
   const hideNavbar = location.pathname === '/signin' || location.pathname === '/register';
 
@@ -32,7 +35,7 @@ function AppContent() {
     <div className="min-h-screen bg-white text-black">
       {!hideNavbar && <Navbar tags={tags} />}
       <Routes>
-        <Route path="/create-news" element={<CreateNews />} />
+        {user.role === 'admin' && <Route path="/create-news" element={<CreateNews />} />}
         <Route path="/news/tag/:tag" element={<NewsListByTag key={location.pathname} />} />
         <Route path="/" element={<DataList />} />
         <Route path="/signin" element={<SignIn />} />

@@ -17,7 +17,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-
+button {
+ cursor: pointer;
+}
 
 
 @media (prefers-color-scheme: light) {

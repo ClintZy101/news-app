@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { useNavigate, Link } from 'react-router-dom';
+import useUserStore from '../../store/userStore';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  const setUser = useUserStore((state) => state.setUser);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await axiosInstance.post('/api/auth/signin', { email, password });
-      localStorage.setItem('token', res.data.token);
+      setUser({ email: res.data.email, role: res.data.role, token: res.data.token });
       navigate('/');
     } catch (error) {
-      console.error('Error signing in', error);
+      setModalMessage('Invalid credentials. Please try again.');
+      setShowModal(true);
+      setTimeout(() => setShowModal(false), 2000);
     }
   };
 
@@ -61,6 +67,13 @@ const SignIn = () => {
             </Link>
           </div>
         </form>
+        {showModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <p>{modalMessage}</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

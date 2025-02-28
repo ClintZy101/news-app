@@ -26,9 +26,9 @@ mongoose
   .catch((err) => console.log(err));
 
 const UserSchema = new mongoose.Schema({
-  username: String,
+  email: { type: String, unique: true },
   password: String,
-  secretKey: String,
+  role: { type: String, enum: ["user", "admin"], default: "user" },
 });
 
 const NewsSchema = new mongoose.Schema({
@@ -46,32 +46,62 @@ const NewsSchema = new mongoose.Schema({
 const User = mongoose.model("User", UserSchema);
 const News = mongoose.model("News", NewsSchema);
 
+// User Registration
+app.post("/api/auth/register", async (req, res) => {
+  const { email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = new User({ email, password: hashedPassword, role: "user" });
+  await newUser.save();
+  res.json({ message: "User registered successfully" });
+});
+
 // Admin Registration
-app.post("/register", async (req, res) => {
-  const { username, password, secretKey } = req.body;
-  if (secretKey !== process.env.SECRET_KEY)
+app.post("/api/auth/register-admin", async (req, res) => {
+  const { email, password, secretKey } = req.body;
+  if (secretKey !== process.env.ADMIN_SECRET_KEY)
     return res.status(403).json({ message: "Invalid secret key" });
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ username, password: hashedPassword, secretKey });
-  await newUser.save();
+  const newAdmin = new User({ email, password: hashedPassword, role: "admin" });
+  await newAdmin.save();
   res.json({ message: "Admin registered successfully" });
 });
 
-// Admin Login
-app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
+// Sign In
+app.post("/api/auth/signin", async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
   if (!user) return res.status(404).json({ message: "User not found" });
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
-  res.json({ token });
+  res.json({ token, email: user.email, role: user.role });
 });
 
-// Create News
-app.post("/api/news", async (req, res) => {
+// Middleware to authenticate and authorize users
+const authMiddleware = (roles = []) => {
+  if (typeof roles === "string") {
+    roles = [roles];
+  }
+
+  return (req, res, next) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) return res.status(401).json({ message: "Unauthorized" });
+      if (roles.length && !roles.includes(decoded.role)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      req.user = decoded;
+      next();
+    });
+  };
+};
+
+// Create News (only admin)
+app.post("/api/news", authMiddleware("admin"), async (req, res) => {
   const { title, text, images, tags, author } = req.body;
   const trimmedTags = tags.map(tag => tag.trim());
   const newNews = new News({ title, text, images, tags: trimmedTags, author });
@@ -80,7 +110,7 @@ app.post("/api/news", async (req, res) => {
   res.json(newNews);
 });
 
-// Get News  (Infinite Scroll)
+// Get News (Infinite Scroll)
 app.get("/api/news", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -107,16 +137,16 @@ app.get("/api/news/tags", async (req, res) => {
   }
 });
 
-// Get News by Tags with Pagination (Infinite Scroll) 
+// Get News by Tags with Pagination (Infinite Scroll)
 app.get("/api/news/tags/:tag", async (req, res) => {
   try {
     const { tag } = req.params;
     const page = parseInt(req.query.page) || 1;
-    // const limit = 3;
+    const limit = 3;
     const news = await News.find({ tags: tag.trim() })
       .sort({ createdAt: -1 })
-      // .skip((page - 1) * limit)
-      // .limit(limit);
+      .skip((page - 1) * limit)
+      .limit(limit);
     res.json(news);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch news" });
@@ -151,8 +181,8 @@ app.post("/news/:id/dislike", async (req, res) => {
   res.json({ dislikes: news.dislikes });
 });
 
-// Delete News with Confirmation
-app.delete("/news/:id", async (req, res) => {
+// Delete News with Confirmation (only admin)
+app.delete("/news/:id", authMiddleware("admin"), async (req, res) => {
   const news = await News.findByIdAndDelete(req.params.id);
   if (!news) return res.status(404).json({ message: "News not found" });
   res.json({ message: "News deleted successfully" });
