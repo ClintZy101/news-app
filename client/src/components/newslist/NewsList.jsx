@@ -57,8 +57,6 @@ const NewsList = () => {
     await axiosInstance.post(`/news/${id}/dislike`);
   };
 
-  console.log(news);
-
   return (
     <div className="container mx-auto mt-3 p-4">
       <h1 className="text-3xl font-bold mb-6 text-center">News</h1>
@@ -73,8 +71,20 @@ const NewsList = () => {
           {news.map((item) => (
             <div key={item._id} className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
               <h5 className="text-2xl font-semibold mb-4">{item.title}</h5>
+              {item.images && item.images.map((image, index) => (
+                <img key={index} src={image} alt={item.title} className="w-full h-64 object-cover rounded mb-4" />
+              ))}
               <p className="text-gray-700 mb-4">{item.text}</p>
               <p className="text-gray-500 mb-4"><strong>Likes:</strong> {item.likes} | <strong>Dislikes:</strong> {item.dislikes}</p>
+              {item.tags && (
+                <div className="mb-4">
+                  {item.tags.map((tag) => (
+                    <span key={tag} className="inline-block bg-gray-200 text-gray-700 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="flex space-x-4 justify-end">
                 <button
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
