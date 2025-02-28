@@ -21,6 +21,7 @@ const NewsList = () => {
       setNews((prevNews) => [newNews, ...prevNews]);
       updateTags([newNews, ...news]);
     });
+      
     socket.on("newsUpdated", (updatedNews) => {
       const updatedNewsList = news.map((item) =>
         item._id === updatedNews._id ? updatedNews : item

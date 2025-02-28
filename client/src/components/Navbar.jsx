@@ -21,14 +21,6 @@ const Navbar = ({ tags }) => {
     }
   };
 
-
-//   // Ensure component updates on tag change
-//   useEffect(() => {
-//     if(location.pathname !== location.pathname) {
-//       navigate(location.pathname, { replace: true });
-//     // Add logic to refetch news or update state based on new tag
-//   }, [location.pathname]);
-
   return (
     <nav className="bg-gray-800 p-4">
       <div className="container mx-auto flex justify-between items-center relative">
@@ -50,12 +42,15 @@ const Navbar = ({ tags }) => {
                     onClick={() => handleTagClick(tag)}
                     className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
                   >
-                    {tag}
+                    #{tag}
                   </button>
                 ))}
               </div>
             )}
           </div>
+          <Link to="/signin" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
+            Sign In
+          </Link>
         </div>
       </div>
     </nav>
