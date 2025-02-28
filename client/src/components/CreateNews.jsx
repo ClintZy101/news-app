@@ -12,6 +12,11 @@ export default function CreateNews() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!title || !text || !images || !tags || !author) {
+            setModalContent('All fields are required.');
+            setShowModal(true);
+            return;
+        }
         try {
             const response = await axiosInstance.post('/api/news', { title, text, images: images.split(','), tags: tags.split(','), author });
             setModalContent('News created successfully!');
@@ -26,6 +31,13 @@ export default function CreateNews() {
             setModalContent('Error creating news. Please try again.');
             setShowModal(true);
             console.error('Error creating news:', error);
+        }
+    };
+
+    const handleTagsChange = (e) => {
+        const value = e.target.value;
+        if (/^[a-zA-Z0-9,]*$/.test(value)) {
+            setTags(value);
         }
     };
 
@@ -65,7 +77,7 @@ export default function CreateNews() {
                         type="text"
                         className="w-full px-3 py-2 border rounded"
                         value={tags}
-                        onChange={(e) => setTags(e.target.value)}
+                        onChange={handleTagsChange}
                     />
                 </div>
                 <div className="mb-4">
@@ -77,15 +89,15 @@ export default function CreateNews() {
                         onChange={(e) => setAuthor(e.target.value)}
                     />
                 </div>
-                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Create</button>
+                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">Create</button>
             </form>
 
             {showModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
                     <div className="bg-white p-4 rounded">
                         <h3 className="text-lg font-bold mb-2">Notification</h3>
                         <p>{modalContent}</p>
-                        <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={() => setShowModal(false)}>Close</button>
+                        <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded cursor-pointer" onClick={() => setShowModal(false)}>Close</button>
                     </div>
                 </div>
             )}

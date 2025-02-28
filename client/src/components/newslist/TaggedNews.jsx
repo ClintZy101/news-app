@@ -9,7 +9,7 @@ const socket = io(
     : "http://localhost:5555"
 );
 
-const NewsList = () => {
+const TaggedNews = () => {
   const [news, setNews] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
@@ -72,7 +72,6 @@ const NewsList = () => {
     await axiosInstance.post(`/news/${id}/dislike`);
   };
 
-  console.log(news);
   return (
     <div className="container mx-auto mt-3 p-4">
       <h1 className="text-3xl font-bold mb-6 text-center">News</h1>
@@ -135,4 +134,4 @@ const NewsList = () => {
   );
 };
 
-export default NewsList;
+export default TaggedNews;

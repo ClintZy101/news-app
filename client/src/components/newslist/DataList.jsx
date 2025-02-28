@@ -1,100 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import axiosInstance from '../../utils/axiosInstance';
-import { useParams } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 const socket = io(process.env.NODE_ENV === 'production' ? 'https://your-production-url.com' : 'http://localhost:5555');
 
-const NewsListByTag = () => {
-  const { tag } = useParams();
+const NewsList = () => {
   const [news, setNews] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-  const newsIds = new Set();
-
-  const loadNews = async () => {
-    try {
-      const res = await axiosInstance.get(`/api/news/tags/${tag}?page=${page}`);
-      const newNews = res.data.filter(item => !newsIds.has(item._id));
-      newNews.forEach(item => newsIds.add(item._id));
-      setNews((prev) => [...prev, ...newNews]);
-      if (newNews.length < 3) setHasMore(false);
-      setPage(page + 1);
-    } catch (error) {
-      console.error('Error loading news', error);
-    }
-  };
 
   useEffect(() => {
-    setNews([]);
-    setHasMore(true);
-    setPage(1);
-    newsIds.clear();
-    loadNews();
+    loadInitialNews();
     socket.on('newsCreated', (newNews) => {
-      if (newNews.tags.includes(tag) && !newsIds.has(newNews._id)) {
-        newsIds.add(newNews._id);
-        setNews((prevNews) => [newNews, ...prevNews]);
-      }
+      setNews((prevNews) => [newNews, ...prevNews]);
     });
     socket.on('newsUpdated', (updatedNews) => {
-      if (updatedNews.tags.includes(tag)) {
-        setNews((prevNews) =>
-          prevNews.map((item) =>
-            item._id === updatedNews._id ? updatedNews : item
-          )
-        );
-      }
+      setNews((prevNews) =>
+        prevNews.map((item) =>
+          item._id === updatedNews._id ? updatedNews : item
+        )
+      );
     });
     return () => {
       socket.off('newsCreated');
       socket.off('newsUpdated');
     };
-  }, [tag]);
+  }, []);
 
-  // const fetchMoreNews = async () => {
-  //   try {
-  //     const res = await axiosInstance.get(`/api/news/tags/${tag}?page=${page + 1}`);
-  //     const updatedNewsList = [...news, ...res.data];
-  //     setNews(updatedNewsList);
-  //     setPage(page + 1);
-  //     updateTags(updatedNewsList);
-  //     if (res.data.length < 3) setHasMore(false);
-  //   } catch (error) {
-  //     console.error("Error loading news", error);
-  //   }
-  // };
+  const loadInitialNews = async () => {
+    try {
+      const res = await axiosInstance.get(`/api/news?page=1`);
+      setNews(res.data);
+      if (res.data.length < 3) setHasMore(false);
+    } catch (error) {
+      console.error('Error loading news', error);
+    }
+  };
+
+  const fetchMoreNews = async () => {
+    try {
+      const res = await axiosInstance.get(`/api/news?page=${page + 1}`);
+      setNews((prev) => [...prev, ...res.data]);
+      setPage(page + 1);
+      if (res.data.length < 3) setHasMore(false);
+    } catch (error) {
+      console.error('Error loading news', error);
+    }
+  };
 
   const handleLike = async (id) => {
-    setNews((prevNews) =>
-      prevNews.map((item) =>
-        item._id === id ? { ...item, likes: item.likes + 1 } : item
-      )
-    );
-    socket.emit('likeNews', { id });
+    await axiosInstance.post(`/news/${id}/like`);
   };
 
   const handleDislike = async (id) => {
-    setNews((prevNews) =>
-      prevNews.map((item) =>
-        item._id === id ? { ...item, dislikes: item.dislikes + 1 } : item
-      )
-    );
-    socket.emit('dislikeNews', { id });
+    await axiosInstance.post(`/news/${id}/dislike`);
   };
-console.log(news)
+
+  console.log(news);
+
   return (
-    <div className="container mx-auto mt-3">
-      <h1 className="text-2xl font-bold mb-4">News tagged with "{tag}"</h1>
+    <div className="container mx-auto mt-3 p-4">
+      <h1 className="text-3xl font-bold mb-6 text-center">News</h1>
       <InfiniteScroll
         dataLength={news.length}
-        next={loadNews}
+        next={fetchMoreNews}
         hasMore={hasMore}
-        loader={<p className="text-center mt-4">Loading...</p>}
-        endMessage={<p className="text-center mt-4">No more news</p>}
+        loader={<h4>Loading...</h4>}
+        endMessage={<p className="text-center">No more news</p>}
       >
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-6">
           {news.map((item) => (
             <div key={item._id} className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
               <h5 className="text-2xl font-semibold mb-4">{item.title}</h5>
@@ -134,4 +109,4 @@ console.log(news)
   );
 };
 
-export default NewsListByTag;
+export default NewsList;
