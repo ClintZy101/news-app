@@ -58,7 +58,7 @@ const AdminPanel = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-start mb-4">
         <Link to="/create-news" className="text-white bg-gray-700 hover:bg-gray-900 text-white px-4 py-2 rounded cursor-pointer transition-all duration-300">
           Create News
         </Link>
@@ -101,7 +101,7 @@ const AdminPanel = () => {
       </div>
 
       {articleToDelete && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50">
           <div className="bg-white p-6 rounded shadow-lg">
             <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
             <p className="mb-4">Are you sure you want to delete this article?</p>

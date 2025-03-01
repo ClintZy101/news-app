@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { FaBars, FaTimes } from "react-icons/fa";
 import useUserStore from "../store/userStore";
 
 const Navbar = ({ tags }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [email, setEmail] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
@@ -21,19 +23,26 @@ const Navbar = ({ tags }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (tagsDropdownRef.current && !tagsDropdownRef.current.contains(event.target)) {
+      if (
+        tagsDropdownRef.current &&
+        !tagsDropdownRef.current.contains(event.target)
+      ) {
         setDropdownOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   const handleTagClick = (tag) => {
@@ -55,15 +64,15 @@ const Navbar = ({ tags }) => {
   const filteredTags = tags.filter((tag) =>
     tag.toLowerCase().includes(searchTerm.toLowerCase())
   );
-console.log(user)
+
   return (
     <nav className="bg-gray-800 p-2 px-4 fixed top-0 left-0 w-full z-50">
-      <div className=" mx-auto flex justify-between items-center relative">
+      <div className="mx-auto flex justify-between items-center relative">
         <Link to="/" className="text-white text-lg font-bold">
           News App
         </Link>
         <div className="flex items-center space-x-4">
-          <div className="relative" ref={tagsDropdownRef}>
+          <div className="relative " ref={tagsDropdownRef}>
             <button
               className="text-white px-4 py-2 cursor-pointer hover:underline transition-all duration-300"
               onClick={toggleDropdown}
@@ -93,36 +102,82 @@ console.log(user)
               </div>
             )}
           </div>
-          {(!user  || user?.role === "admin") && (
-            <>
-              <Link
-                to="/admin-panel"
-                className="text-white bg-gray-700 hover:bg-gray-900 px-4 py-2 rounded cursor-pointer transition-all duration-300"
-              >
-                Admin Panel
-              </Link>
-              <Link
-                to="/news-statistics"
-                className="text-white bg-gray-700 hover:bg-gray-900 px-4 py-2 rounded cursor-pointer transition-all duration-300"
-              >
-                News Statistics
-              </Link>
-            </>
-          )}
-
-          {email ? (
-            <>
+          <button className="text-white md:hidden" onClick={toggleSidebar}>
+            <FaBars />
+          </button>
+          <div className="hidden md:flex items-center space-x-4">
+            {(!user || user?.role === "admin") && (
+              <>
+                <Link
+                  to="/admin-panel"
+                  className="text-white bg-gray-700 hover:bg-gray-900 px-4 py-2 rounded cursor-pointer transition-all duration-300"
+                >
+                  Admin Panel
+                </Link>
+                <Link
+                  to="/news-statistics"
+                  className="text-white bg-gray-700 hover:bg-gray-900 px-4 py-2 rounded cursor-pointer transition-all duration-300"
+                >
+                  News Statistics
+                </Link>
+              </>
+            )}
+            {email ? (
               <button
                 onClick={handleSignOut}
                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer"
               >
                 Sign Out
               </button>
+            ) : (
+              <Link
+                to="/signin"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+      <div
+        className={`fixed inset-0 bg-gray-800/50 z-40 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={toggleSidebar}
+      >
+        <div className={`fixed top-0 right-0 w-64 bg-white h-full shadow-lg z-50 p-4 transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+          <button className="text-black mb-4" onClick={toggleSidebar}>
+            <FaTimes />
+          </button>
+          {(!user || user?.role === "admin") && (
+            <>
+              <Link
+                to="/admin-panel"
+                className="block text-black bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded cursor-pointer transition-all duration-300 mb-2"
+                onClick={toggleSidebar}
+              >
+                Admin Panel
+              </Link>
+              <Link
+                to="/news-statistics"
+                className="block text-black bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded cursor-pointer transition-all duration-300 mb-2"
+                onClick={toggleSidebar}
+              >
+                News Statistics
+              </Link>
             </>
+          )}
+          {email ? (
+            <button
+              onClick={handleSignOut}
+              className="block w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer"
+            >
+              Sign Out
+            </button>
           ) : (
             <Link
               to="/signin"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+              className="block w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+              onClick={toggleSidebar}
             >
               Sign In
             </Link>

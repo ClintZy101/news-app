@@ -34,15 +34,6 @@ const NewsList = () => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   if (location.state?.articleId) {
-  //     const articleId = location.state.articleId;
-  //     if (newsRefs.current[articleId]) {
-  //       newsRefs.current[articleId].scrollIntoView({ behavior: 'smooth' });
-  //     }
-  //   }
-  // }, [location, news]);
-
   const loadInitialNews = async () => {
     try {
       const res = await axiosInstance.get(`/api/news?page=1`);
@@ -72,11 +63,9 @@ const NewsList = () => {
       console.error('Error incrementing views', error);
     }
   };
-
-  console.log(news);
-
+console.log('news',news);
   return (
-    <div className="container mx-auto mt-3 p-4">
+    <div className="container mx-auto mt-3 p-4 w-full">
       <h1 className="text-3xl font-bold mb-6 text-center">News</h1>
       <InfiniteScroll
         dataLength={news.length}
@@ -94,9 +83,17 @@ const NewsList = () => {
               onClick={() => handleCardClick(item._id)}
             >
               <h5 className="text-2xl font-semibold mb-4">{item.title}</h5>
-              {item.images && item.images.map((image, index) => (
-                <img key={index} src={image} alt={item.title} className="w-full h-64 object-cover rounded mb-4" />
-              ))}
+              {item.images && item.images.length > 1 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {item.images.map((image, index) => (
+                    <img key={index} src={image} alt={item.title} className="w-full h-32 object-cover rounded" />
+                  ))}
+                </div>
+              ) : (
+                item.images && item.images.map((image, index) => (
+                  <img key={index} src={image} alt={item.title} className="w-full h-64 object-cover rounded mb-4" />
+                ))
+              )}
               <p className="text-gray-700 mb-4 line-clamp-2">{item.text}</p>
               <p className="text-gray-500 mb-4"><strong>Likes:</strong> {item.likes} | <strong>Dislikes:</strong> {item.dislikes}</p>
               {item.tags && (
