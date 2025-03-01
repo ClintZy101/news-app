@@ -37,7 +37,7 @@ function AppContent() {
   const hideNavbar = location.pathname === '/signin' || location.pathname === '/register';
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-white text-black pt-20">
       {!hideNavbar && <Navbar tags={tags} />}
       <Routes>
         {user.role === 'admin' && <Route path="/create-news" element={<CreateNews />} />}
