@@ -3,19 +3,34 @@ import axiosInstance from '../utils/axiosInstance';
 
 const NewsStatistics = () => {
   const [statistics, setStatistics] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    const fetchStatistics = async () => {
-      try {
-        const res = await axiosInstance.get('/api/news/statistics');
-        setStatistics(res.data);
-      } catch (error) {
-        console.error('Error fetching statistics', error);
-      }
-    };
+    fetchStatistics(page);
+  }, [page]);
 
-    fetchStatistics();
-  }, []);
+  const fetchStatistics = async (page) => {
+    try {
+      const res = await axiosInstance.get(`/api/news/statistics?page=${page}`);
+      setStatistics(res.data.statistics || []);
+      setTotalPages(res.data.totalPages || 1);
+    } catch (error) {
+      console.error('Error fetching statistics', error);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -40,6 +55,25 @@ const NewsStatistics = () => {
           ))}
         </tbody>
       </table>
+      <div className="flex justify-between items-center mt-4">
+        <button
+          onClick={handlePreviousPage}
+          disabled={page === 1}
+          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Previous
+        </button>
+        <span className="text-gray-700">
+          Page {page} of {totalPages}
+        </span>
+        <button
+          onClick={handleNextPage}
+          disabled={page === totalPages}
+          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

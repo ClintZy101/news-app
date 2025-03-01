@@ -32,7 +32,7 @@ function AppContent() {
 
     fetchTags();
   }, []);
-  console.log('tags',tags);
+  // console.log('tags',tags);
 
   const hideNavbar = location.pathname === '/signin' || location.pathname === '/register';
 

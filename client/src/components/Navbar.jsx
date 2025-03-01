@@ -39,8 +39,8 @@ const Navbar = ({ tags }) => {
   };
 
   return (
-    <nav className="bg-gray-800 p-4 fixed top-0 left-0 w-full z-50">
-      <div className="container mx-auto flex justify-between items-center relative">
+    <nav className="bg-gray-800 p-2 px-4 fixed top-0 left-0 w-full z-50">
+      <div className=" mx-auto flex justify-between items-center relative">
         <Link to="/" className="text-white text-lg font-bold">News App</Link>
         <div className="flex items-center space-x-4">
        

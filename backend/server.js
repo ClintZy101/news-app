@@ -180,11 +180,18 @@ app.get("/api/news/tags/:tag", async (req, res) => {
   }
 });
 
-// Get news views and likes statistics
+// Get news views and likes statistics with pagination
 app.get('/api/news/statistics', authMiddleware('admin'), async (req, res) => {
   try {
-    const statistics = await News.find({}, 'title views likes dislikes').sort({ views: -1 });
-    res.json(statistics);
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const totalArticles = await News.countDocuments();
+    const totalPages = Math.ceil(totalArticles / limit);
+    const statistics = await News.find({}, 'title views likes dislikes')
+      .sort({ views: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+    res.json({ statistics, totalPages });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch statistics' });
   }
@@ -251,16 +258,6 @@ app.post("/news/:id/view", async (req, res) => {
   news.views += 1;
   await news.save();
   res.json({ views: news.views });
-});
-
-// Get news views and likes statistics
-app.get('/api/news/statistics', authMiddleware('admin'), async (req, res) => {
-  try {
-    const statistics = await News.find({}, 'title views likes dislikes').sort({ views: -1 });
-    res.json(statistics);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch statistics' });
-  }
 });
 
 // Get all news for admin panel with pagination
