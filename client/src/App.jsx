@@ -13,6 +13,7 @@ import AdminPanel from './pages/AdminPanel';
 import EditArticle from './pages/EditArticle';
 import NewsList from "./components/newslist/NewsList";
 import NewsDetail from './pages/NewsDetail';
+import NewsStatistics from './pages/NewsStatistics';
 
 function AppContent() {
   const [tags, setTags] = React.useState([]);
@@ -31,7 +32,7 @@ function AppContent() {
 
     fetchTags();
   }, []);
-  console.log(user.role);
+  console.log('tags',tags);
 
   const hideNavbar = location.pathname === '/signin' || location.pathname === '/register';
 
@@ -48,6 +49,7 @@ function AppContent() {
         <Route path="/admin-panel" element={<AdminPanel />} />
         <Route path="/edit-article/:id" element={<EditArticle />} />
         <Route path="/news/:id" element={<NewsDetail />} />
+        {user.role === 'admin' && <Route path="/news-statistics" element={<NewsStatistics />} />}
       </Routes>
     </div>
   );

@@ -4,7 +4,9 @@ import axiosInstance from '../../utils/axiosInstance';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const socket = io(process.env.NODE_ENV === 'production' ? 'https://your-production-url.com' : 'http://localhost:5555');
+const socket = io(process.env.NODE_ENV === 'production' ? 'https://your-production-url.com' : 'http://localhost:5555', {
+  transports: ['websocket'],
+});
 
 const NewsList = () => {
   const [news, setNews] = useState([]);
@@ -62,8 +64,14 @@ const NewsList = () => {
     }
   };
 
-  const handleCardClick = (id) => {
-    navigate(`/news/${id}`);
+  const handleCardClick = async (id) => {
+    try {
+      await axiosInstance.post(`/news/${id}/view`);
+      socket.emit('viewNews', { id });
+      navigate(`/news/${id}`);
+    } catch (error) {
+      console.error('Error incrementing views', error);
+    }
   };
 
   console.log(news);

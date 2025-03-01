@@ -178,6 +178,16 @@ app.get("/api/news/tags/:tag", async (req, res) => {
   }
 });
 
+// Get news views and likes statistics
+app.get('/api/news/statistics', authMiddleware('admin'), async (req, res) => {
+  try {
+    const statistics = await News.find({}, 'title views likes dislikes').sort({ views: -1 });
+    res.json(statistics);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
+
 // Get News by ID
 app.get("/api/news/:id", async (req, res) => {
   const news = await News.findById(req.params.id);
@@ -206,6 +216,25 @@ app.post("/news/:id/dislike", async (req, res) => {
   res.json({ dislikes: news.dislikes });
 });
 
+// Increment views for a news article
+app.post("/news/:id/view", async (req, res) => {
+  const news = await News.findById(req.params.id);
+  if (!news) return res.status(404).json({ message: "News not found" });
+  news.views += 1;
+  await news.save();
+  io.emit("newsUpdated", news); // Emit event to all connected clients
+  res.json({ views: news.views });
+});
+
+// Get news views and likes statistics
+app.get('/api/news/statistics', authMiddleware('admin'), async (req, res) => {
+  try {
+    const statistics = await News.find({}, 'title views likes dislikes').sort({ views: -1 });
+    res.json(statistics);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
 
 // Get all news for admin panel with pagination
 app.get('/api/admin/news', authMiddleware('admin'), async (req, res) => {
@@ -246,6 +275,15 @@ io.on("connection", (socket) => {
     const news = await News.findById(id);
     if (news) {
       news.dislikes += 1;
+      await news.save();
+      io.emit("newsUpdated", news);
+    }
+  });
+
+  socket.on("viewNews", async ({ id }) => {
+    const news = await News.findById(id);
+    if (news) {
+      news.views += 1;
       await news.save();
       io.emit("newsUpdated", news);
     }
