@@ -1,0 +1,99 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import axiosInstance from '../utils/axiosInstance';
+import { FaThumbsUp, FaThumbsDown, FaArrowLeft } from 'react-icons/fa';
+
+const NewsDetail = () => {
+  const { id } = useParams();
+  const [news, setNews] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await axiosInstance.get(`/api/news/${id}`);
+        setNews(res.data);
+      } catch (error) {
+        console.error('Error fetching news', error);
+      }
+    };
+
+    fetchNews();
+  }, [id]);
+
+  const handleLike = async () => {
+    try {
+      const res = await axiosInstance.post(`/news/${id}/like`);
+      setNews((prevNews) => ({ ...prevNews, likes: res.data.likes }));
+    } catch (error) {
+      console.error('Error liking news', error);
+    }
+  };
+
+  const handleDislike = async () => {
+    try {
+      const res = await axiosInstance.post(`/news/${id}/dislike`);
+      setNews((prevNews) => ({ ...prevNews, dislikes: res.data.dislikes }));
+    } catch (error) {
+      console.error('Error disliking news', error);
+    }
+  };
+
+  const handleBack = () => {
+    if (location.state?.fromAdminPanel) {
+      navigate('/admin-panel');
+    } else {
+      navigate('/');
+    }
+  };
+
+  if (!news) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="container mx-auto mt-3 p-4">
+      <button
+        onClick={handleBack}
+        className="mb-4 flex items-center justify-self-end bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+      >
+        <FaArrowLeft className="mr-2" />{location.state?.fromAdminPanel ? 'Back Admin Panel' : 'Back to News List'}
+      </button>
+      <h1 className="text-3xl font-bold mb-6">{news.title}</h1>
+      {news.images && news.images.map((image, index) => (
+        <img key={index} src={image} alt={news.title} className="w-full h-64 object-cover rounded mb-4" />
+      ))}
+      <p className="text-gray-700 mb-4">{news.text}</p>
+      <p className="text-gray-500 mb-4 flex items-center"><FaThumbsUp className="mr-2 text-blue-500" /> {news.likes} |  <FaThumbsDown className="mx-2 text-red-500" />{news.dislikes}</p>
+      {news.tags && (
+        <div className="mb-4">
+          {news.tags.map((tag) => (
+            <span key={tag} className="inline-block bg-gray-200 text-gray-700 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+      <div>
+        <p className='text-gray-500'>Author: {news.author}</p>
+      </div>
+      <div className="flex space-x-4 justify-end mt-4">
+        <button
+          className="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+          onClick={handleLike}
+        >
+          <FaThumbsUp className="mr-2" /> Like
+        </button>
+        <button
+          className="flex items-center bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+          onClick={handleDislike}
+        >
+          <FaThumbsDown className="mr-2" /> Dislike
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default NewsDetail;

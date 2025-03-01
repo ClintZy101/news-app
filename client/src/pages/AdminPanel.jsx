@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
 import useArticleStore from '../store/articleStore';
 
@@ -9,6 +9,7 @@ const AdminPanel = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [articleToDelete, setArticleToDelete] = useState(null);
   const setArticleData = useArticleStore((state) => state.setArticleData);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -50,10 +51,13 @@ const AdminPanel = () => {
     setArticleData(article);
   };
 
+  const handleView = (id) => {
+    navigate(`/news/${id}`, { state: { fromAdminPanel: true } });
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
-      <Link to="/create-article" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 inline-block">Create New Article</Link>
       <table className="min-w-full bg-white">
         <thead>
           <tr>
@@ -64,7 +68,7 @@ const AdminPanel = () => {
         <tbody className=''>
           {articles.map(article => (
             <tr key={article._id} className='border-b'>
-              <td className="py-2">{article.title}</td>
+              <td className="py-2 cursor-pointer" onClick={() => handleView(article._id)}>{article.title}</td>
               <td className="py-2">
                 <Link to={`/edit-article/${article._id}`} className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2" onClick={() => handleEdit(article)}>Edit</Link>
                 <button onClick={() => confirmDelete(article._id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Delete</button>

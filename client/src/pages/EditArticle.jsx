@@ -72,7 +72,7 @@ const EditArticle = () => {
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="text">Text</label>
           <textarea
             id="text"
-            rows={30}
+            rows={20}
             value={text}
             onChange={(e) => setText(e.target.value)}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"

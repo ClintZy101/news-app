@@ -1,17 +1,18 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import CreateNews from "./components/CreateNews";
+import CreateNews from "./pages/CreateNews";
 import NewsListByTag from "./components/newslist/NewsListByTag";
 import Navbar from "./components/Navbar";
-import DataList from "./components/newslist/DataList";
+
 import SignIn from "./components/auth/SignIn";
 import SignOut from "./components/auth/SignOut";
 import Register from "./components/auth/Register";
 import axiosInstance from "./utils/axiosInstance"; // Ensure axiosInstance is imported
 import useUserStore from "./store/userStore";
 import AdminPanel from './pages/AdminPanel';
-import CreateArticle from './pages/CreateArticle';
 import EditArticle from './pages/EditArticle';
+import NewsList from "./components/newslist/NewsList";
+import NewsDetail from './pages/NewsDetail';
 
 function AppContent() {
   const [tags, setTags] = React.useState([]);
@@ -40,13 +41,13 @@ function AppContent() {
       <Routes>
         {user.role === 'admin' && <Route path="/create-news" element={<CreateNews />} />}
         <Route path="/news/tag/:tag" element={<NewsListByTag key={location.pathname} />} />
-        <Route path="/" element={<DataList />} />
+        <Route path="/" element={<NewsList />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signout" element={<SignOut />} />
         <Route path="/register" element={<Register />} />
         <Route path="/admin-panel" element={<AdminPanel />} />
-        <Route path="/create-article" element={<CreateArticle />} />
         <Route path="/edit-article/:id" element={<EditArticle />} />
+        <Route path="/news/:id" element={<NewsDetail />} />
       </Routes>
     </div>
   );
