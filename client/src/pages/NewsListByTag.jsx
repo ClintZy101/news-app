@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useParams, useNavigate } from 'react-router-dom';
+import axiosInstance from '../utils/axiosInstance';
 
 const NewsListByTag = () => {
   const { tag } = useParams();

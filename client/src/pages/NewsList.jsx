@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
-import axiosInstance from '../../utils/axiosInstance';
+import axiosInstance from '../utils/axiosInstance';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useNavigate, useLocation } from 'react-router-dom';
 

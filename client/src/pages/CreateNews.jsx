@@ -80,7 +80,7 @@ export default function CreateNews() {
     };
 
     return (
-        <div className="container mx-auto mt-5">
+        <div className="container mx-auto mt-5 pb-10">
             <div className='flex w-full justify-center'> <h2 className="text-2xl font-bold mb-4 ">Create News</h2></div>
            
             <form onSubmit={handleSubmit}>
@@ -141,7 +141,7 @@ export default function CreateNews() {
                         readOnly
                     />
                 </div>
-                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">Create</button>
+                <button type="submit" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded cursor-pointer w-full">Create</button>
             </form>
 
             {showModal && (

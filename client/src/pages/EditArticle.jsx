@@ -55,7 +55,7 @@ const EditArticle = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 pb-10">
       <h1 className="text-2xl font-bold mb-4">Edit Article</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -108,7 +108,7 @@ const EditArticle = () => {
           ))}
           <button type="button" onClick={addTagField} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add Tag</button>
         </div>
-        <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Update</button>
+        <button type="submit" className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">Update</button>
       </form>
     </div>
   );
