@@ -29,6 +29,8 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   password: String,
   role: { type: String, enum: ["user", "admin"], default: "user" },
+  likedNews: [{ type: mongoose.Schema.Types.ObjectId, ref: "News" }],
+  dislikedNews: [{ type: mongoose.Schema.Types.ObjectId, ref: "News" }],
 });
 
 const NewsSchema = new mongoose.Schema({
@@ -85,16 +87,16 @@ const authMiddleware = (roles = []) => {
     roles = [roles];
   }
 
-  return (req, res, next) => {
+  return async (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
       if (err) return res.status(401).json({ message: "Unauthorized" });
       if (roles.length && !roles.includes(decoded.role)) {
         return res.status(403).json({ message: "Forbidden" });
       }
-      req.user = decoded;
+      req.user = await User.findById(decoded.id);
       next();
     });
   };
@@ -192,28 +194,54 @@ app.get('/api/news/statistics', authMiddleware('admin'), async (req, res) => {
 app.get("/api/news/:id", async (req, res) => {
   const news = await News.findById(req.params.id);
   if (!news) return res.status(404).json({ message: "News not found" });
-  news.views += 1;
-  await news.save();
   res.json(news);
 });
 
 // Like/Dislike News
-app.post("/news/:id/like", async (req, res) => {
+app.post("/news/:id/like", authMiddleware(), async (req, res) => {
   const news = await News.findById(req.params.id);
   if (!news) return res.status(404).json({ message: "News not found" });
-  news.likes += 1;
+
+  if (req.user.likedNews && req.user.likedNews.includes(news._id)) {
+    news.likes -= 1;
+    req.user.likedNews = req.user.likedNews.filter(id => !id.equals(news._id));
+  } else {
+    if (req.user.dislikedNews && req.user.dislikedNews.includes(news._id)) {
+      news.dislikes -= 1;
+      req.user.dislikedNews = req.user.dislikedNews.filter(id => !id.equals(news._id));
+    }
+    news.likes += 1;
+    req.user.likedNews = req.user.likedNews || [];
+    req.user.likedNews.push(news._id);
+  }
+
   await news.save();
+  await req.user.save();
   io.emit("newsUpdated", news); // Emit event to all connected clients
-  res.json({ likes: news.likes });
+  res.json({ likes: news.likes, dislikes: news.dislikes });
 });
 
-app.post("/news/:id/dislike", async (req, res) => {
+app.post("/news/:id/dislike", authMiddleware(), async (req, res) => {
   const news = await News.findById(req.params.id);
   if (!news) return res.status(404).json({ message: "News not found" });
-  news.dislikes += 1;
+
+  if (req.user.dislikedNews && req.user.dislikedNews.includes(news._id)) {
+    news.dislikes -= 1;
+    req.user.dislikedNews = req.user.dislikedNews.filter(id => !id.equals(news._id));
+  } else {
+    if (req.user.likedNews && req.user.likedNews.includes(news._id)) {
+      news.likes -= 1;
+      req.user.likedNews = req.user.likedNews.filter(id => !id.equals(news._id));
+    }
+    news.dislikes += 1;
+    req.user.dislikedNews = req.user.dislikedNews || [];
+    req.user.dislikedNews.push(news._id);
+  }
+
   await news.save();
+  await req.user.save();
   io.emit("newsUpdated", news); // Emit event to all connected clients
-  res.json({ dislikes: news.dislikes });
+  res.json({ likes: news.likes, dislikes: news.dislikes });
 });
 
 // Increment views for a news article
@@ -222,7 +250,6 @@ app.post("/news/:id/view", async (req, res) => {
   if (!news) return res.status(404).json({ message: "News not found" });
   news.views += 1;
   await news.save();
-  io.emit("newsUpdated", news); // Emit event to all connected clients
   res.json({ views: news.views });
 });
 

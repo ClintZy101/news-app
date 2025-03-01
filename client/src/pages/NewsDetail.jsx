@@ -6,6 +6,8 @@ import { FaThumbsUp, FaThumbsDown, FaArrowLeft } from 'react-icons/fa';
 const NewsDetail = () => {
   const { id } = useParams();
   const [news, setNews] = useState(null);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [hasDisliked, setHasDisliked] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,6 +16,8 @@ const NewsDetail = () => {
       try {
         const res = await axiosInstance.get(`/api/news/${id}`);
         setNews(res.data);
+        setHasLiked(res.data.likedByUser);
+        setHasDisliked(res.data.dislikedByUser);
       } catch (error) {
         console.error('Error fetching news', error);
       }
@@ -25,7 +29,9 @@ const NewsDetail = () => {
   const handleLike = async () => {
     try {
       const res = await axiosInstance.post(`/news/${id}/like`);
-      setNews((prevNews) => ({ ...prevNews, likes: res.data.likes }));
+      setNews((prevNews) => ({ ...prevNews, likes: res.data.likes, dislikes: res.data.dislikes }));
+      setHasLiked(!hasLiked);
+      if (hasDisliked) setHasDisliked(false);
     } catch (error) {
       console.error('Error liking news', error);
     }
@@ -34,7 +40,9 @@ const NewsDetail = () => {
   const handleDislike = async () => {
     try {
       const res = await axiosInstance.post(`/news/${id}/dislike`);
-      setNews((prevNews) => ({ ...prevNews, dislikes: res.data.dislikes }));
+      setNews((prevNews) => ({ ...prevNews, likes: res.data.likes, dislikes: res.data.dislikes }));
+      setHasDisliked(!hasDisliked);
+      if (hasLiked) setHasLiked(false);
     } catch (error) {
       console.error('Error disliking news', error);
     }
@@ -80,16 +88,16 @@ const NewsDetail = () => {
       </div>
       <div className="flex space-x-4 justify-end mt-4">
         <button
-          className="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+          className={`flex items-center ${hasLiked ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-700'} text-white font-bold py-2 px-4 rounded cursor-pointer`}
           onClick={handleLike}
         >
-          <FaThumbsUp className="mr-2" /> Like
+          <FaThumbsUp className="mr-2" /> {hasLiked ? 'Liked' : 'Like'}
         </button>
         <button
-          className="flex items-center bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+          className={`flex items-center ${hasDisliked ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-700'} text-white font-bold py-2 px-4 rounded cursor-pointer`}
           onClick={handleDislike}
         >
-          <FaThumbsDown className="mr-2" /> Dislike
+          <FaThumbsDown className="mr-2" /> {hasDisliked ? 'Disliked' : 'Dislike'}
         </button>
       </div>
     </div>

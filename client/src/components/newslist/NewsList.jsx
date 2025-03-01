@@ -67,7 +67,6 @@ const NewsList = () => {
   const handleCardClick = async (id) => {
     try {
       await axiosInstance.post(`/news/${id}/view`);
-      socket.emit('viewNews', { id });
       navigate(`/news/${id}`);
     } catch (error) {
       console.error('Error incrementing views', error);
