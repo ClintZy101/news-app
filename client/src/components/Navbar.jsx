@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import useUserStore from "../store/userStore";
 
@@ -10,12 +10,26 @@ const Navbar = ({ tags }) => {
   const location = useLocation();
   const user = useUserStore((state) => state.user);
   const clearUser = useUserStore((state) => state.clearUser);
+  const tagsDropdownRef = useRef(null);
 
   useEffect(() => {
     const storedEmail = localStorage.getItem("email");
     if (storedEmail) {
       setEmail(storedEmail);
     }
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (tagsDropdownRef.current && !tagsDropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const toggleDropdown = () => {
@@ -49,7 +63,7 @@ console.log(user)
           News App
         </Link>
         <div className="flex items-center space-x-4">
-          <div className="relative">
+          <div className="relative" ref={tagsDropdownRef}>
             <button
               className="text-white px-4 py-2 cursor-pointer hover:underline transition-all duration-300"
               onClick={toggleDropdown}

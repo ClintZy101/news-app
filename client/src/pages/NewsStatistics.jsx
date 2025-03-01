@@ -6,6 +6,7 @@ const NewsStatistics = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+
   useEffect(() => {
     fetchStatistics(page);
   }, [page]);
@@ -32,6 +33,7 @@ const NewsStatistics = () => {
     }
   };
 
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">News Views Statistics</h1>
@@ -47,7 +49,9 @@ const NewsStatistics = () => {
         <tbody>
           {statistics.map((stat) => (
             <tr key={stat._id} className='border-b'>
-              <td className="py-2 ">{stat.title}</td>
+              <td className="py-2" >
+                {stat.title}
+              </td>
               <td className="py-2 text-center">{stat.views}</td>
               <td className="py-2 text-center">{stat.likes}</td>
               <td className="py-2 text-center">{stat.dislikes}</td>
