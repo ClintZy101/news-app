@@ -40,15 +40,17 @@ function AppContent() {
     <div className="min-h-screen bg-white text-black pt-20">
       {!hideNavbar && <Navbar tags={tags} />}
       <Routes>
-        {user.role === 'admin' && <Route path="/create-news" element={<CreateNews />} />}
+
         <Route path="/news/tag/:tag" element={<NewsListByTag key={location.pathname} />} />
         <Route path="/" element={<NewsList />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signout" element={<SignOut />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/admin-panel" element={<AdminPanel />} />
-        <Route path="/edit-article/:id" element={<EditArticle />} />
         <Route path="/news/:id" element={<NewsDetail />} />
+        
+        {user.role === 'admin' && <Route path="/admin-panel" element={<AdminPanel />} />}
+        {user.role === 'admin' && <Route path="/create-news" element={<CreateNews />} />}
+        {user.role === 'admin' && <Route path="/edit-article/:id" element={<EditArticle />} />}
         {user.role === 'admin' && <Route path="/news-statistics" element={<NewsStatistics />} />}
       </Routes>
     </div>

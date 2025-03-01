@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
-import { FaThumbsUp, FaThumbsDown, FaArrowLeft } from 'react-icons/fa';
+import { FaThumbsUp, FaThumbsDown, FaArrowLeft, FaTimes } from 'react-icons/fa';
 
 const NewsDetail = () => {
   const { id } = useParams();
   const [news, setNews] = useState(null);
   const [hasLiked, setHasLiked] = useState(false);
   const [hasDisliked, setHasDisliked] = useState(false);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,7 +34,11 @@ const NewsDetail = () => {
       setHasLiked(!hasLiked);
       if (hasDisliked) setHasDisliked(false);
     } catch (error) {
-      console.error('Error liking news', error);
+      if (error.response && error.response.status === 401) {
+        setModalIsOpen(true);
+      } else {
+        console.error('Error liking news', error);
+      }
     }
   };
 
@@ -44,7 +49,11 @@ const NewsDetail = () => {
       setHasDisliked(!hasDisliked);
       if (hasLiked) setHasLiked(false);
     } catch (error) {
-      console.error('Error disliking news', error);
+      if (error.response && error.response.status === 401) {
+        setModalIsOpen(true);
+      } else {
+        console.error('Error disliking news', error);
+      }
     }
   };
 
@@ -54,6 +63,15 @@ const NewsDetail = () => {
     } else {
       navigate('/');
     }
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
+
+  const redirectToSignIn = () => {
+    setModalIsOpen(false);
+    navigate('/signin');
   };
 
   if (!news) {
@@ -100,6 +118,18 @@ const NewsDetail = () => {
           <FaThumbsDown className="mr-2" /> {hasDisliked ? 'Disliked' : 'Dislike'}
         </button>
       </div>
+      {modalIsOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-lg relative">
+            <button onClick={closeModal} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+              <FaTimes />
+            </button>
+            <h2 className="text-2xl mb-4">Sign In Required</h2>
+            <p>You need to sign in to like or dislike a news article.</p>
+            <button onClick={redirectToSignIn} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Sign In</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

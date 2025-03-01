@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import useUserStore from '../store/userStore';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import useUserStore from "../store/userStore";
 
 const Navbar = ({ tags }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [email, setEmail] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const user = useUserStore((state) => state.user);
+  const clearUser = useUserStore((state) => state.clearUser);
 
   useEffect(() => {
-    const storedEmail = localStorage.getItem('email');
+    const storedEmail = localStorage.getItem("email");
     if (storedEmail) {
       setEmail(storedEmail);
     }
@@ -25,7 +26,7 @@ const Navbar = ({ tags }) => {
     setDropdownOpen(false);
     const tagPath = `/news/tag/${encodeURIComponent(tag.trim())}`;
     if (location.pathname === tagPath) {
-      navigate('/temp', { replace: true });
+      navigate("/temp", { replace: true });
       setTimeout(() => navigate(tagPath, { replace: true }), 0);
     } else {
       navigate(tagPath);
@@ -33,18 +34,20 @@ const Navbar = ({ tags }) => {
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('email');
-    setEmail(null);
-    navigate('/signin');
+    clearUser();
+    navigate("/signin");
   };
 
-  const filteredTags = tags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-
+  const filteredTags = tags.filter((tag) =>
+    tag.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+console.log(user)
   return (
     <nav className="bg-gray-800 p-2 px-4 fixed top-0 left-0 w-full z-50">
       <div className=" mx-auto flex justify-between items-center relative">
-        <Link to="/" className="text-white text-lg font-bold">News App</Link>
+        <Link to="/" className="text-white text-lg font-bold">
+          News App
+        </Link>
         <div className="flex items-center space-x-4">
           <div className="relative">
             <button
@@ -76,12 +79,23 @@ const Navbar = ({ tags }) => {
               </div>
             )}
           </div>
-          {user.role === 'admin' && (
+          {(!user  || user?.role === "admin") && (
             <>
-              <Link to="/admin-panel" className="text-white bg-gray-700 hover:bg-gray-900 text-white px-4 py-2 rounded cursor-pointer transition-all duration-300">Admin Panel</Link>
-              <Link to="/news-statistics" className="text-white bg-gray-700 hover:bg-gray-900 text-white px-4 py-2 rounded cursor-pointer transition-all duration-300">News Statistics</Link>
+              <Link
+                to="/admin-panel"
+                className="text-white bg-gray-700 hover:bg-gray-900 px-4 py-2 rounded cursor-pointer transition-all duration-300"
+              >
+                Admin Panel
+              </Link>
+              <Link
+                to="/news-statistics"
+                className="text-white bg-gray-700 hover:bg-gray-900 px-4 py-2 rounded cursor-pointer transition-all duration-300"
+              >
+                News Statistics
+              </Link>
             </>
           )}
+
           {email ? (
             <>
               <button
@@ -92,7 +106,10 @@ const Navbar = ({ tags }) => {
               </button>
             </>
           ) : (
-            <Link to="/signin" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
+            <Link
+              to="/signin"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+            >
               Sign In
             </Link>
           )}

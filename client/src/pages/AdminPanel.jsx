@@ -74,9 +74,9 @@ const AdminPanel = () => {
           {articles.map(article => (
             <tr key={article._id} className='border-b'>
               <td className="py-2 cursor-pointer" onClick={() => handleView(article._id)}>{article.title}</td>
-              <td className="py-2">
-                <Link to={`/edit-article/${article._id}`} className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2" onClick={() => handleEdit(article)}>Edit</Link>
-                <button onClick={() => confirmDelete(article._id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Delete</button>
+              <td className="py-2 flex space-x-2">
+                <Link to={`/edit-article/${article._id}`} className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition-all duration-300" onClick={() => handleEdit(article)}>Edit</Link>
+                <button onClick={() => confirmDelete(article._id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-all duration-300">Delete</button>
               </td>
             </tr>
           ))}
