@@ -59,7 +59,7 @@ const AdminPanel = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
       <div className="flex justify-start mb-4">
-        <Link to="/create-news" className="text-white bg-gray-700 hover:bg-gray-900 hover:shadow-2xl shadow-lg text-white px-4 py-2 rounded cursor-pointer transition-all duration-300">
+        <Link to="/create-news" className=" bg-gray-700 hover:bg-gray-900 hover:shadow-2xl shadow-lg text-white px-4 py-2 rounded cursor-pointer transition-all duration-300">
           Create News
         </Link>
       </div>

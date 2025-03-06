@@ -4,6 +4,7 @@ import axiosInstance from '../utils/axiosInstance';
 import { FaThumbsUp, FaThumbsDown, FaArrowLeft, FaTimes } from 'react-icons/fa';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import { io } from 'socket.io-client';
 
 const NewsDetail = () => {
   const { id } = useParams();
@@ -13,6 +14,7 @@ const NewsDetail = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const socket = io('http://localhost:4000'); // Adjust the URL as needed
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -27,7 +29,17 @@ const NewsDetail = () => {
     };
 
     fetchNews();
-  }, [id]);
+
+    socket.on('newsUpdate', (updatedNews) => {
+      if (updatedNews.id === id) {
+        setNews(updatedNews);
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [id, socket]);
 
   const handleLike = async () => {
     try {
@@ -35,6 +47,7 @@ const NewsDetail = () => {
       setNews((prevNews) => ({ ...prevNews, likes: res.data.likes, dislikes: res.data.dislikes }));
       setHasLiked(!hasLiked);
       if (hasDisliked) setHasDisliked(false);
+      socket.emit('newsUpdate', res.data);
     } catch (error) {
       if (error.response && error.response.status === 401) {
         setModalIsOpen(true);
@@ -50,6 +63,7 @@ const NewsDetail = () => {
       setNews((prevNews) => ({ ...prevNews, likes: res.data.likes, dislikes: res.data.dislikes }));
       setHasDisliked(!hasDisliked);
       if (hasLiked) setHasLiked(false);
+      socket.emit('newsUpdate', res.data);
     } catch (error) {
       if (error.response && error.response.status === 401) {
         setModalIsOpen(true);
